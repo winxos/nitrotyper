@@ -16,11 +16,22 @@ def img_hash(src):
 
 
 imgs = []
+def found_sub():
+    im = pg.screenshot()
+    im_raw = np.array(im)
+    roi_color_lower = np.array([172, 234, 160])
+    roi_color_upper = np.array([172, 234, 160])  # todo 添加对输入错误的颜色采集
+    roi_mask = cv2.inRange(im_raw.copy(), roi_color_lower, roi_color_upper)
+    roi_mask = cv2.dilate(roi_mask, None, iterations=2)
+    x, y, w, h = cv2.boundingRect(roi_mask)  # x,y,w,h
+    if w * h > 0:
+        return x, y, w, h
+    found_sub()
+    return None
 
-last_cursor = 0
 if __name__ == "__main__":
-    r = (1200, 835, 1700, 868)  # todo 可以实现坐标自动采集
-    # sub.show()
+    b = found_sub()
+    r = (b[0], b[1], b[0] + b[2] * 27, b[1] + b[3])  # todo 可以实现坐标自动采集
     while True:
         im = pg.screenshot()
         sub = im.crop(r)
@@ -42,7 +53,7 @@ if __name__ == "__main__":
             img_h = img_hash(im_char)
             if img_h not in imgs:
                 imgs.append(img_h)
-                cv2.imwrite("./datas/%s.png" % str(img_h), im_char)  # todo 自动采集样本，通过配置文件来打标签
+                cv2.imwrite("./data/%s.png" % str(img_h), im_char)  # todo 自动采集样本，通过配置文件来打标签
                 # todo 自动录入实现
                 # cv2.imshow("raw", cvs)
         time.sleep(0.1)
