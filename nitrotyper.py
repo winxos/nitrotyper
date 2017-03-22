@@ -15,15 +15,23 @@ def img_hash(src):
     return cv2.countNonZero(src)
 
 
+#
+# def img_dhash(src):
+#     h, w = src.shape[:2]
+#     hash = ""
+#     for r in range(h - 1):
+#         for c in range(w):
+#             if src[r][c] != src[r + 1][c]:
+#                 hash += "1"
+#             else:
+#                 hash += "0"
+#     return '%0*X' % ((len(hash) + 3) // 4, int(hash, 2))
 def img_dhash(src):
     h, w = src.shape[:2]
     hash = ""
     for r in range(h - 1):
         for c in range(w):
-            if src[r][c] != src[r + 1][c]:
-                hash += "1"
-            else:
-                hash += "0"
+            hash += "%d" % (src[r][c] == 0)
     return '%0*X' % ((len(hash) + 3) // 4, int(hash, 2))
 
 
@@ -86,9 +94,8 @@ def get_roi_bounding_rect(img, color_min, color_max):
 
 def main_loop():
     bx, by, bw, bh = found_sub()
-    r = (bx, by, bx + bw * 42, by + bh)
-    timer = 0
-    last_cursor = 0
+    r = (bx - 5, by, bx + bw * 42, by + bh)
+    enter_counter = 0
     while True:
         im = pg.screenshot()
         sub = im.crop(r)
@@ -98,39 +105,36 @@ def main_loop():
         roi_color = np.array([160, 234, 172])
         x, y, w, h = get_roi_bounding_rect(cvs, roi_color, roi_color)
         # print("%d %d" % (w, h))
+        enter_counter += 1
+        if enter_counter > 20:
+            # print("[debug] not found.")
+            print((x, y, w, h))
+            pg.press("enter")
+            enter_counter = 0
+            time.sleep(1)
         if w * h != bw * bh:  # err
             roi_color_error = np.array([160, 170, 234])
             x, y, w, h = get_roi_bounding_rect(cvs, roi_color_error, roi_color_error)
             if w * h != bw * bh:
-                # print("[debug] not found.")
-                # print((x, y, w, h))
-                pg.press("enter")
                 continue
-        # if x != last_cursor:
-        #     last_cursor = x
-        #     timer = 0
-        # else:
-        #     timer += 1
-        #     if timer > 50:
-        #         timer = 0
-        #         all_press()
         if w * h == bw * bh:  # w*h
             im_char = cvs[y:y + h, x:x + w, :]
             im_char = cv2.cvtColor(im_char, cv2.COLOR_RGB2GRAY)
             t, im_char = cv2.threshold(im_char, 0, 255, cv2.THRESH_OTSU)
             # im_char = cv2.resize(im_char, (8, 9), interpolation=cv2.INTER_AREA)
-            cv2.imshow("im", im_char)
+            # cv2.imshow("im", im_char)
             ch = image_decode(im_char)
             print(ch[:3])
-            if ch[0][0] < 30:  # auto press
+            if ch[0][0] < 20:  # auto press
                 pg.press(ch[0][1])
+                enter_counter = 0
             img_h = img_dhash(im_char)
             if img_h not in imgs:
                 imgs.append(img_h)
                 cv2.imwrite("./data/%s.png" % str(img_h), im_char)
                 # todo 自动录入实现
                 # cv2.imshow("raw", cvs)
-        time.sleep(0.05)
+        # time.sleep(0.05)
         key = cv2.waitKey(1)
         if key == 27:  # 按空格切换窗体
             break  # esc退出程序
