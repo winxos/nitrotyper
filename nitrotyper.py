@@ -102,21 +102,27 @@ def main_loop():
         cvs = np.array(sub)
         cvs = cv2.cvtColor(cvs, cv2.COLOR_BGR2RGB)
         # cvs = cv2.cvtColor(cvs, cv2.COLOR_BGR2GRAY)
-        roi_color = np.array([160, 234, 172])
+        roi_color = np.array([160, 234, 172]) #BGR of normal green box
         x, y, w, h = get_roi_bounding_rect(cvs, roi_color, roi_color)
-        # print("%d %d" % (w, h))
-        enter_counter += 1
-        if enter_counter > 20:
-            # print("[debug] not found.")
-            print((x, y, w, h))
-            pg.press("enter")
-            enter_counter = 0
-            time.sleep(1)
+
         if w * h != bw * bh:  # err
-            roi_color_error = np.array([160, 170, 234])
+            roi_color_error = np.array([160, 170, 234]) #error red box
             x, y, w, h = get_roi_bounding_rect(cvs, roi_color_error, roi_color_error)
             if w * h != bw * bh:
-                continue
+                enter_counter += 1
+                if enter_counter > 50:
+                    pg.press("enter")
+                    print(enter_counter)
+                    print("w,h: %d %d" % (w, h))
+                    if enter_counter > 500:
+                        # print("[debug] not found.")
+                        print((x, y, w, h))
+                        pg.press("f5")
+                        time.sleep(2)
+                        pg.press("enter")
+                        enter_counter = 0
+                    time.sleep(0.1)
+                    continue
         if w * h == bw * bh:  # w*h
             im_char = cvs[y:y + h, x:x + w, :]
             im_char = cv2.cvtColor(im_char, cv2.COLOR_RGB2GRAY)
@@ -128,13 +134,17 @@ def main_loop():
             if ch[0][0] < 20:  # auto press
                 pg.press(ch[0][1])
                 enter_counter = 0
+            else:
+                all_press()
+                time.sleep(1)
             img_h = img_dhash(im_char)
             if img_h not in imgs:
                 imgs.append(img_h)
                 cv2.imwrite("./data/%s.png" % str(img_h), im_char)
                 # todo 自动录入实现
                 # cv2.imshow("raw", cvs)
-        # time.sleep(0.05)
+        time.sleep(0.05)
+
         key = cv2.waitKey(1)
         if key == 27:  # 按空格切换窗体
             break  # esc退出程序
