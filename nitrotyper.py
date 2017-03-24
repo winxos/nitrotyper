@@ -108,12 +108,12 @@ def main_loop():
         if 300 > miss > 200:
             print("[debug] enter.")
             pg.press("enter")
-            miss = 0
-            time.sleep(2)
+            time.sleep(1)
             r, _, _ = get_bound()
-        elif miss == 500:
+        elif miss > 500:
             pg.press("f5")
-            time.sleep(2)
+            time.sleep(1)
+            miss = 0
         im = pg.screenshot()
         sub = im.crop(r)
         cvs = np.array(sub)
@@ -128,6 +128,8 @@ def main_loop():
                 print("[debug] miss %d." % miss)
                 miss += 1
                 continue
+        else:
+            miss = 0
         if last_x == x:  #
             enter_counter += 1
             print("[debug] retry times %d" % enter_counter)
@@ -153,10 +155,10 @@ def main_loop():
         else:
             # all_press()
             pass
-        img_h = img_dhash(im_char)
-        if img_h not in imgs:
-            imgs.append(img_h)
-            cv2.imwrite("./data/%s.png" % str(img_h), im_char)
+        # img_h = img_dhash(im_char)
+        # if img_h not in imgs:
+        #     imgs.append(img_h)
+        #     cv2.imwrite("./data/%s.png" % str(img_h), im_char)
 
         cv2.imshow("raw", cvs)
         time.sleep(0.05)
