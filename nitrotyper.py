@@ -105,7 +105,7 @@ def main_loop():
     last_x = 0
     miss = 0
     while True:
-        if miss == 150:
+        if 300 > miss > 200:
             print("[debug] enter.")
             pg.press("enter")
             miss = 0
@@ -131,9 +131,9 @@ def main_loop():
         if last_x == x:  #
             enter_counter += 1
             print("[debug] retry times %d" % enter_counter)
-            if enter_counter == 3:
-                all_press()
-                time.sleep(1)
+            if enter_counter == 6:
+                pg.press("enter")
+                print("[debug] press enter")
             elif enter_counter == 10:
                 pg.press("enter")
                 print("[debug] press enter")
@@ -151,11 +151,12 @@ def main_loop():
             # print("[debug] press '%s'" % ch[0][1])
             pg.press(ch[0][1])
         else:
-            all_press()
-        # img_h = img_dhash(im_char)
-        # if img_h not in imgs:
-        #     imgs.append(img_h)
-        #     cv2.imwrite("./data/%s.png" % str(img_h), im_char)
+            # all_press()
+            pass
+        img_h = img_dhash(im_char)
+        if img_h not in imgs:
+            imgs.append(img_h)
+            cv2.imwrite("./data/%s.png" % str(img_h), im_char)
 
         cv2.imshow("raw", cvs)
         time.sleep(0.05)
