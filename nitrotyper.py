@@ -10,6 +10,9 @@ import numpy as np
 import time
 import json
 
+NORMAL_CHAR_BOX_COLOR = np.array([160, 234, 172])
+ERROR_CHAR_BOX_COLOR = np.array([160, 170, 234])
+
 
 def img_hash(src):
     return cv2.countNonZero(src)
@@ -66,17 +69,27 @@ imgs = []
 
 
 def found_sub():
-    im = pg.screenshot()
-    im_raw = np.array(im)
-    roi_color = np.array([172, 234, 160])
-    roi_mask = cv2.inRange(im_raw.copy(), roi_color, roi_color)
-    roi_mask = cv2.erode(roi_mask, None, iterations=1)
-    x, y, w, h = cv2.boundingRect(roi_mask)  # x,y,w,h
-    if w * h > 0:
-        return x, y, w, h
-    else:
+    timer = 0
+    while True:
+        im = pg.screenshot()
+        im_raw = np.array(im)
+        im_raw = cv2.cvtColor(im_raw, cv2.COLOR_BGR2RGB)
+        # cv2.imwrite("a.png", im_raw)
+        roi_mask = cv2.inRange(im_raw.copy(), NORMAL_CHAR_BOX_COLOR, NORMAL_CHAR_BOX_COLOR)
+        # cv2.imwrite("b.png", roi_mask)
+        roi_mask = cv2.erode(roi_mask, None, iterations=1)
+        x, y, w, h = cv2.boundingRect(roi_mask)  # x,y,w,h
+        if w * h > 0:
+            break
         time.sleep(0.1)
-        return found_sub()
+        timer += 1
+        print("[debug] try found bound. %d" % timer)
+        if timer > 30:
+            pg.press("f5")
+            print("[debug] time out, refresh")
+            time.sleep(3)
+            timer = 0
+    return x, y, w, h
 
 
 def all_press():
@@ -88,14 +101,14 @@ def all_press():
 
 def get_roi_bounding_rect(img, color_min, color_max):
     roi_mask = cv2.inRange(img.copy(), color_min, color_max)
-    roi_mask = cv2.erode(roi_mask, None, iterations=1)  # todo 准确度测试
+    roi_mask = cv2.erode(roi_mask, None, iterations=1)
     # cv2.imshow("mask", roi_mask)
     return cv2.boundingRect(roi_mask)  # x,y,w,h
 
 
 def get_bound():
     bx, by, bw, bh = found_sub()
-    r = (bx - 5, by, bx + bw * 42, by + bh)
+    r = (bx - 5, by, bx + bw * 42, by + bh * 2)
     return r, bw, bh
 
 
@@ -118,12 +131,9 @@ def main_loop():
         sub = im.crop(r)
         cvs = np.array(sub)
         cvs = cv2.cvtColor(cvs, cv2.COLOR_BGR2RGB)
-        # cvs = cv2.cvtColor(cvs, cv2.COLOR_BGR2GRAY)
-        roi_color = np.array([160, 234, 172])  # BGR of normal green box
-        x, y, w, h = get_roi_bounding_rect(cvs, roi_color, roi_color)
+        x, y, w, h = get_roi_bounding_rect(cvs, NORMAL_CHAR_BOX_COLOR, NORMAL_CHAR_BOX_COLOR)
         if w * h != bw * bh:  # err
-            roi_color_error = np.array([160, 170, 234])  # error red box
-            x, y, w, h = get_roi_bounding_rect(cvs, roi_color_error, roi_color_error)
+            x, y, w, h = get_roi_bounding_rect(cvs, ERROR_CHAR_BOX_COLOR, ERROR_CHAR_BOX_COLOR)
             if w * h != bw * bh:  # nothing found.
                 print("[debug] miss %d." % miss)
                 miss += 1
@@ -152,9 +162,6 @@ def main_loop():
         if ch[0][0] < 20:  # auto press
             # print("[debug] press '%s'" % ch[0][1])
             pg.press(ch[0][1])
-        else:
-            # all_press()
-            pass
         # img_h = img_dhash(im_char)
         # if img_h not in imgs:
         #     imgs.append(img_h)
@@ -164,7 +171,7 @@ def main_loop():
         time.sleep(0.05)
 
         key = cv2.waitKey(1)
-        if key == 27:  # 按空格切换窗体
+        if key == 27:
             break  # esc退出程序
 
 
