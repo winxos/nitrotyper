@@ -10,7 +10,7 @@ import numpy as np
 import time
 import json
 
-TYPE_SPEED_DELAY = 0.05
+TYPE_SPEED_DELAY = 0.00
 IS_SAMPLER = False
 NORMAL_CHAR_BOX_COLOR = np.array([160, 234, 172])
 ERROR_CHAR_BOX_COLOR = np.array([160, 170, 234])
@@ -73,7 +73,7 @@ def found_bound():
         time.sleep(0.1)
         timer += 1
         print("[debug] try found bound. %d" % timer)
-        if timer > 30:
+        if timer > 60:
             pg.press("f5")
             print("[debug] time out, refresh")
             time.sleep(3)
@@ -119,10 +119,12 @@ def main_loop():
             pg.press("f5")
             time.sleep(1)
             miss = 0
-        im = pg.screenshot()
-        sub = im.crop(r)
+        st = time.clock()
+        sub = pg.screenshot(region=r) #todo 截屏速度太慢，考虑提高截屏速度或者一次打多个
+        # print("[debug]sreenshot %f" % (time.clock() - st))
         cvs = np.array(sub)
         cvs = cv2.cvtColor(cvs, cv2.COLOR_BGR2RGB)
+        # print("[debug]convert %f" % (time.clock() - st))
         x, y, w, h = get_roi_bounding_rect(cvs, NORMAL_CHAR_BOX_COLOR, NORMAL_CHAR_BOX_COLOR)
         if w * h != bw * bh:  # err
             x, y, w, h = get_roi_bounding_rect(cvs, ERROR_CHAR_BOX_COLOR, ERROR_CHAR_BOX_COLOR)
@@ -147,8 +149,9 @@ def main_loop():
         im_char = cvs[y:y + h, x:x + w, :]
         im_char = cv2.cvtColor(im_char, cv2.COLOR_RGB2GRAY)
         t, im_char = cv2.threshold(im_char, 0, 255, cv2.THRESH_OTSU)
+        # print("[debug]exact %f" % (time.clock() - st))
         ch = image_recognize(im_char)
-        print("[debug] recognize %s" % str(ch[:3]))
+        print("[debug] recognize %s time used:%f" % (str(ch[:3]), time.clock() - st))
         if ch[0][0] < 20:  # auto press
             pg.press(ch[0][1])
         if IS_SAMPLER:
