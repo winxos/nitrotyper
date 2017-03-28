@@ -123,6 +123,7 @@ def run(delay=0.05, is_sampler=False):
         im_char = cvs[y:y + h, x:x + w, :]
         im_char = cv2.cvtColor(im_char, cv2.COLOR_RGB2GRAY)
         t, im_char = cv2.threshold(im_char, 0, 255, cv2.THRESH_OTSU)
+        # im_char=cv2.resize(im_char,(10,30))
         # print("[debug]exact %f" % (time.clock() - st))
         ch = image_recognize(im_char)
         print("[debug] recognize %s time used:%f" % (str(ch[:3]), time.clock() - st))
@@ -138,18 +139,14 @@ def run(delay=0.05, is_sampler=False):
             break  # esc退出程序
 
 
-def load_data():
-    global char_data
-    try:
-        with open('data/chars.json', 'r', encoding='utf-8') as fg:
-            char_data = json.load(fg)
-            # log("[debug] config loaded.")
-    except IOError as e:
-        print("[error] %s" % e)
-        exit()
+import pkgutil  # 必须采用pkgutil.get_data才能读取egg格式包中的数据
 
-
-load_data()
+try:
+    f = pkgutil.get_data("nitrotyper", 'data/chars.json').decode('utf-8')  #
+    char_data = json.loads(f)
+except IOError as e:
+    print("[error] %s" % e)
+    exit()
 
 if __name__ == "__main__":
     run(delay=0)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from distutils.core import setup
-
+# from distutils.core import setup
+from setuptools import setup, find_packages
 from os import path
 
 here = path.abspath(path.dirname(__file__))
@@ -8,8 +8,8 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 setup(
     name='nitrotyper',
-    packages=['nitrotyper'],  # this must be the same as the name above
-    version='0.1',
+    # packages=['nitrotyper'],  # this must be the same as the name above
+    version='0.4.2',
     description='https://www.nitrotype.com auto typer',
     long_description=long_description,
     author='winxos',
@@ -40,5 +40,10 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
-    install_requires=['pyautogui','opencv-python']
+    install_requires=['pyautogui', 'opencv-python'],
+    packages=['nitrotyper'],
+    package_dir={"nitrotyper": "nitrotyper"},
+    package_data={
+        "nitrotyper": ["data/*.json"]
+    }
 )
