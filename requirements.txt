@@ -1,5 +1,0 @@
-#nitro auto typer requirements
-#usage: pip3 install -r requirements.txt
-#winxos 2017-03-17
-pyautogui
-opencv-python

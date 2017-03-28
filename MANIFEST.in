@@ -1,0 +1,3 @@
+# data package
+recursive-include nitrotyper *
+include README.md
