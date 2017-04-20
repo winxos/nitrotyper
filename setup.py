@@ -7,16 +7,15 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 setup(
-    name='nitrotyper',
+    name='AISTLAB_nitrotyper',
     # packages=['nitrotyper'],  # this must be the same as the name above
-    version='0.4.2',
+    version='0.6.0',
     description='https://www.nitrotype.com auto typer',
     long_description=long_description,
     author='winxos',
     author_email='winxos@hotmail.com',
     url='https://github.com/winxos/nitrotyper',  # use the URL to the github repo
-    download_url='https://github.com/winxos/nitrotyper/archive/0.1.tar.gz',  # I'll explain this in a second
-    keywords=['nitrotype', 'winxos', 'auto'],  # arbitrary keywords
+    keywords=['nitrotype', 'winxos', 'AISTLAB'],  # arbitrary keywords
     classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha
@@ -41,9 +40,14 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     install_requires=['pyautogui', 'opencv-python'],
-    packages=['nitrotyper'],
+    packages=find_packages(),
     package_dir={"nitrotyper": "nitrotyper"},
     package_data={
         "nitrotyper": ["data/*.json"]
+    },
+    entry_points={
+        "console_scripts": [
+            "nitrotyper = nitrotyper.nitrotyper:run",
+        ]
     }
 )

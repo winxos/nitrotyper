@@ -47,7 +47,7 @@ def sampler(im_char, imgs=[]):
         cv2.imwrite("./data/%s.png" % str(img_h), im_char)
 
 
-def run(delay=0.05, is_sampler=False):
+def run(delay=0.01, is_sampler=False):
     NORMAL_CHAR_BOX_COLOR = np.array([160, 234, 172])
     ERROR_CHAR_BOX_COLOR = np.array([160, 170, 234])
 

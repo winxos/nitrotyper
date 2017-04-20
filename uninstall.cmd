@@ -1,0 +1,1 @@
+pip3 uninstall aistlab_nitrotyper -y
